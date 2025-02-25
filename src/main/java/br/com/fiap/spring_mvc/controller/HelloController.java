@@ -34,7 +34,7 @@ public class HelloController {
         Livro livro2 = new Livro();
         livro2.setAutor("Homero");
         livro2.setTitulo("Iliada");
-        livro.setCategoria(Categoria.FATASIA);
+        livro.setCategoria(Categoria.FANTASIA);
         List<Livro> livros = Arrays.asList(livro, livro2);
         ModelAndView mv = new ModelAndView("livro");
         mv.addObject("livro", livro);

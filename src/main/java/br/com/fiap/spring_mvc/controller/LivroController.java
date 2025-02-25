@@ -7,11 +7,10 @@ import br.com.fiap.spring_mvc.service.LivroService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/livro")
@@ -40,6 +39,35 @@ public class LivroController {
 
     @GetMapping("/lista")
     public ModelAndView listarLivros(){
-        return new ModelAndView("livrolista");
+        List<Livro> livros = livroService.buscarLivros();
+
+        ModelAndView mv = new ModelAndView("livrolista");
+        mv.addObject("listaLivros", livros);
+        return mv;
+    }
+
+    @GetMapping ("/edicao/{id}")
+    public ModelAndView livroEdicao(@PathVariable Long id){
+    Livro livro = livroService.buscarLivro(id);
+    if(livro == null){
+        return listarLivros();
+    }
+    ModelAndView mv = new ModelAndView("livroEdicao");
+    mv.addObject("idLivro", id);
+    mv.addObject("livro", livroService.livroToRequest(livro));
+    return mv;
+    }
+
+    @PostMapping("/editar/{id}")
+    public ModelAndView editarLivro(@PathVariable Long id,
+                                    @Valid @ModelAttribute LivroRequest livroRequest){
+    livroService.atualizarLivro(id, livroRequest);
+    return listarLivros();
+    }
+
+    @GetMapping("/deletar/{id}")
+    public ModelAndView deletarLivro(@PathVariable Long id){
+        livroService.deletarLivro(id);
+        return listarLivros();
     }
 }
