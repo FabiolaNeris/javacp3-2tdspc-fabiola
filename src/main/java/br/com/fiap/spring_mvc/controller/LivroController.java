@@ -7,6 +7,8 @@ import br.com.fiap.spring_mvc.service.LivroService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -22,52 +24,51 @@ public class LivroController {
     @Autowired
 
     @GetMapping("/cadastro")
-    public ModelAndView livroCadastro() {
-        ModelAndView mv = new ModelAndView("livroCadastro");
-        mv.addObject("livroRequest", new LivroRequest());
-        return mv;
+    public String livroCadastro (Model model) {
+        model.addAttribute("livroRequest", new LivroRequest());
+        return "livroCadastro";
     }
 
     @PostMapping("/cadastrar")
-    public ModelAndView cadastrarLivro(@Valid @ModelAttribute LivroRequest livroRequest){
+    public String cadastrarLivro(@Valid LivroRequest livroRequest,BindingResult result, Model model){
+        if (result.hasErrors()) {
+            return "livroCadastro";
+        }
         //mapear livroRequest para livro
         //salvar livro no bando de dados
-        Livro livro = livroService.salvarLivro(livroRequest);
+        livroService.salvarLivro(livroRequest);
         //renderizar a página com a lista de livros cadastrados
-        return listarLivros();
+        return listarLivros(model);
     }
 
     @GetMapping("/lista")
-    public ModelAndView listarLivros(){
+    public String listarLivros(Model model){
         List<Livro> livros = livroService.buscarLivros();
-
-        ModelAndView mv = new ModelAndView("livrolista");
-        mv.addObject("listaLivros", livros);
-        return mv;
+        model.addAttribute("listaLivros", livros);
+        return "livroLista";
     }
 
     @GetMapping ("/edicao/{id}")
-    public ModelAndView livroEdicao(@PathVariable Long id){
+    public String livroEdicao(@PathVariable Long id, Model model){
     Livro livro = livroService.buscarLivro(id);
     if(livro == null){
-        return listarLivros();
+        return listarLivros(model);
     }
-    ModelAndView mv = new ModelAndView("livroEdicao");
-    mv.addObject("idLivro", id);
-    mv.addObject("livro", livroService.livroToRequest(livro));
-    return mv;
+    model.addAttribute("idLivro", id);
+    model.addAttribute("livro", livroService.livroToRequest(livro));
+    return "livroEdicao";
     }
 
     @PostMapping("/editar/{id}")
-    public ModelAndView editarLivro(@PathVariable Long id,
-                                    @Valid @ModelAttribute LivroRequest livroRequest){
+    public String editarLivro(@PathVariable Long id,
+                                    @Valid @ModelAttribute LivroRequest livroRequest, Model model){
     livroService.atualizarLivro(id, livroRequest);
-    return listarLivros();
+    return listarLivros(model);
     }
 
     @GetMapping("/deletar/{id}")
-    public ModelAndView deletarLivro(@PathVariable Long id){
+    public String deletarLivro(@PathVariable Long id, Model model){
         livroService.deletarLivro(id);
-        return listarLivros();
+        return listarLivros(model);
     }
 }
